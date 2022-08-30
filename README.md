@@ -3,6 +3,8 @@ Cheat Table for F1 Manager 2022
 
 It seems that the game is storing everything in the [in-memory SQLite3 database](https://www.sqlite.org/inmemorydb.html), this cheat table allows you to export it and later import it back to the game with your editions.
 
+![](https://i.imgur.com/8Wf80zU.png)
+
 The editing itself can be done with the [DB Browser for SQLite](https://sqlitebrowser.org/dl/)
 I've created an example showing how to change the team balance that you can find [here](https://github.com/xAranaktu/F1-Manager-2022-Cheat-Table/blob/main/tutorials/change_team_balance.md) and video for it you can find [here](https://streamable.com/pubd8l)
 
