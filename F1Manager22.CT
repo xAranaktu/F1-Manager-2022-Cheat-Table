@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheatTable CheatEngineTableVersion="38">
+  <CheatEntries>
+    <CheatEntry>
+      <ID>4949</ID>
+      <Description>"============="</Description>
+      <LastState Value="" RealAddress="00000000"/>
+      <GroupHeader>1</GroupHeader>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>9</ID>
+      <Description>"For Game Build: [1.5.0.91710]"</Description>
+      <LastState Value="" RealAddress="00000000"/>
+      <GroupHeader>1</GroupHeader>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>4950</ID>
+      <Description>"============="</Description>
+      <LastState Value="" RealAddress="00000000"/>
+      <GroupHeader>1</GroupHeader>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>4951</ID>
+      <Description>"Donate:"</Description>
+      <LastState Value="" RealAddress="00000000"/>
+      <GroupHeader>1</GroupHeader>
+      <CheatEntries>
+        <CheatEntry>
+          <ID>4953</ID>
+          <Description>"patreon.com/xAranaktu"</Description>
+          <LastState Value="" RealAddress="00000000"/>
+          <GroupHeader>1</GroupHeader>
+        </CheatEntry>
+      </CheatEntries>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>4952</ID>
+      <Description>"============="</Description>
+      <LastState Value="" RealAddress="00000000"/>
+      <GroupHeader>1</GroupHeader>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>4934</ID>
+      <Description>"CompactMode"</Description>
+      <LastState Activated="1"/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>[ENABLE]
+LuaCall(function cycleFullCompact(sender,force) local state = not(compactmenuitem.Caption == 'Compact View Mode'); if force~=nil then state = not force end; compactmenuitem.Caption = state and 'Compact View Mode' or 'Full View Mode'; getMainForm().Splitter1.Visible = state; getMainForm().Panel4.Visible    = state; getMainForm().Panel5.Visible    = state; end; function addCompactMenu() if compactmenualreadyexists then return end; local parent = getMainForm().Menu.Items; compactmenuitem = createMenuItem(parent); parent.add(compactmenuitem); compactmenuitem.Caption = 'Compact View Mode'; compactmenuitem.OnClick = cycleFullCompact; compactmenualreadyexists = 'yes'; end; addCompactMenu(); cycleFullCompact(nil,true))
+
+[DISABLE]
+LuaCall(cycleFullCompact(nil,false))
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>8</ID>
+      <Description>"Always Keep Backups of GAME SAVES!"</Description>
+      <LastState Value="" RealAddress="00000000"/>
+      <Color>0000FF</Color>
+      <GroupHeader>1</GroupHeader>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>1</ID>
+      <Description>"Activate Me Before Load Your Game Save"</Description>
+      <Options moHideChildren="1"/>
+      <LastState Activated="1"/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : F1Manager22.exe
+  Version:
+  Date   : 2022-08-30
+  Author : Aranaktu
+}
+
+[ENABLE]
+{$lua}
+if syntaxcheck then return end
+
+if (getCEVersion() &lt; 7.3) then showMessage("This Cheat Table requires Cheat Engine 7.3 or newer") end
+if (not cheatEngineIs64Bit()) then showMessage("Run 64-bit version of cheat engine (cheatengine-x86_64.exe)") end
+
+{$asm}
+aobscanmodule(addr_fnOpenDatabase,F1Manager22.exe, 48 8B C4 48 89 50 10 53 41 54 48 81)
+registersymbol(addr_fnOpenDatabase)
+
+aobscanmodule(addr_fnCloseDatabase,F1Manager22.exe, 48 89 7C 24 20 41 56 48 83 EC 30 41 89)
+registersymbol(addr_fnCloseDatabase)
+
+aobscanmodule(addr_fnBackupInit,F1Manager22.exe, 48 83 EC 28 48 89 6C 24 38 4C 89 CD)
+registersymbol(addr_fnBackupInit)
+
+aobscanmodule(addr_fnBackupStep,F1Manager22.exe, 40 53 48 83 EC 70 48 8B 41 20)
+registersymbol(addr_fnBackupStep)
+
+aobscanmodule(addr_fnBackupFinish,F1Manager22.exe, 40 53 48 83 EC 20 48 89 CB 48 85 C9 75 08)
+registersymbol(addr_fnBackupFinish)
+
+aobscanmodule(INJECT_obtain_db_ptr,F1Manager22.exe,89 4C 24 20 48 8B 0E) // should be unique
+alloc(newmem,$100,INJECT_obtain_db_ptr)
+
+globalalloc(pSqlite3, 8, INJECT_obtain_db_ptr)
+pSqlite3:
+dq 0
+
+globalalloc(export_done, 1, callExportDB)
+export_done:
+db 00
+
+globalalloc(import_done, 1, callExportDB)
+import_done:
+db 00
+
+globalalloc(callExportDB, $500, addr_fnOpenDatabase)
+globalalloc(tmp_sqlite3, 8, callExportDB)
+tmp_sqlite3:
+dq 00
+
+globalalloc(fname, 32, callExportDB)
+fname:
+db 66 31 2E 64 62 00 // f1.db
+
+globalalloc(database_name, 5, callExportDB)
+database_name:
+db 6D 61 69 6E 00 // main
+
+
+label(code)
+label(return)
+
+newmem:
+code:
+  mov [pSqlite3], rsi
+  mov [rsp+20],ecx
+  mov rcx,[rsi]
+
+  jmp return
+
+INJECT_obtain_db_ptr:
+  jmp newmem
+  nop 2
+return:
+registersymbol(INJECT_obtain_db_ptr)
+
+[DISABLE]
+//code from here till the end of the code will be used to disable the cheat
+INJECT_obtain_db_ptr:
+  db 89 4C 24 20 48 8B 0E
+
+unregistersymbol(INJECT_obtain_db_ptr)
+dealloc(newmem)
+
+unregistersymbol(addr_fnOpenDatabase)
+unregistersymbol(addr_fnCloseDatabase)
+unregistersymbol(addr_fnBackupInit)
+unregistersymbol(addr_fnBackupStep)
+unregistersymbol(addr_fnBackupFinish)
+</AssemblerScript>
+      <CheatEntries>
+        <CheatEntry>
+          <ID>6</ID>
+          <Description>"_DEBUG"</Description>
+          <Options moHideChildren="1"/>
+          <LastState Value="" RealAddress="00000000"/>
+          <Color>C0C0C0</Color>
+          <GroupHeader>1</GroupHeader>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>7</ID>
+              <Description>"_DONT_TOUCH"</Description>
+              <Options moHideChildren="1"/>
+              <LastState Value="" RealAddress="00000000"/>
+              <GroupHeader>1</GroupHeader>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>2</ID>
+                  <Description>"sqlite3"</Description>
+                  <LastState Value="000001B52750F700" RealAddress="7FF61A930000"/>
+                  <ShowAsHex>1</ShowAsHex>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <VariableType>8 Bytes</VariableType>
+                  <Address>pSqlite3</Address>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>3</ID>
+          <Description>"ExportDB"</Description>
+          <LastState/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>[ENABLE]
+{$lua}
+if syntaxcheck then return end
+
+{$asm}
+CREATETHREAD(callExportDB)
+
+callExportDB:
+sub rsp, 28 //x64 shadow and align
+mov r8, [pSqlite3]
+test r8, r8
+jz set_error
+jmp open_db
+set_error:
+mov [export_done], 2     // No pointer for sqlite3
+jmp _exit
+
+open_db:
+// OpenDatabase
+mov rcx, fname
+mov rdx, tmp_sqlite3
+mov r8d, 6
+xor r9, r9
+call addr_fnOpenDatabase
+
+// InitBackup
+mov rcx, [tmp_sqlite3] // pTo
+mov rdx, database_name // main
+mov r8, [pSqlite3]     // pFrom
+mov r9, database_name  // main
+call addr_fnBackupInit
+mov rbx, rax
+iterate_pages:
+mov edx, FFFFFFFF
+mov rcx, rbx
+call addr_fnBackupStep
+cmp eax, 65
+jz pre_finish
+test eax, eax
+jz iterate_pages
+jmp finish
+pre_finish:
+mov dil, 1
+finish:
+mov rcx, rbx
+call addr_fnBackupFinish
+mov rcx, [tmp_sqlite3]
+xor rdx, rdx
+call addr_fnCloseDatabase
+mov [export_done], 1
+jmp _exit
+_exit:
+add rsp, 28
+ret
+
+
+
+[DISABLE]
+//code from here till the end of the code will be used to disable the cheat
+</AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>5</ID>
+          <Description>"ImportDB_OnSave"</Description>
+          <LastState/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>{ Game   : F1Manager22.exe
+  Version: 
+  Date   : 2022-08-30
+  Author : Aranaktu
+
+  This script does blah blah blah
+}
+
+[ENABLE]
+//code from here to '[DISABLE]' will be used to enable the cheat
+
+ 
+ 
+aobscanmodule(INJECT,F1Manager22.exe,4C 8B 07 4C 8D 0D ?? ?? ?? ?? 48 8B 4C 24 20) // should be unique
+alloc(newmem,$1000,INJECT)
+
+label(code)
+label(return)
+
+newmem:
+  // OpenDatabase
+  mov rcx, fname
+  mov rdx, tmp_sqlite3
+  mov r8d, 6
+  xor r9, r9
+  call addr_fnOpenDatabase
+code:
+  // InitBackup
+  mov r8, [tmp_sqlite3]     // pFrom
+  mov r9, database_name     // main
+  mov rcx,[rsp+20]          // pTo
+  mov rdx, database_name    // main
+  call addr_fnBackupInit
+  mov rbx, rax
+  test rbx, rbx
+  jz _exit
+  iterate_pages:
+  mov edx, FFFFFFFF
+  mov rcx, rbx
+  call addr_fnBackupStep
+  cmp eax, 65
+  jz pre_finish
+  test eax, eax
+  jz iterate_pages
+  jmp finish
+  pre_finish:
+  mov dil, 1
+  finish:
+  mov rcx, rbx
+  call addr_fnBackupFinish
+  _exit:
+  mov rcx, [tmp_sqlite3]
+  xor rdx, rdx
+  call addr_fnCloseDatabase
+  jmp INJECT+6A
+
+INJECT:
+  jmp newmem
+  nop 5
+return:
+registersymbol(INJECT)
+
+[DISABLE]
+//code from here till the end of the code will be used to disable the cheat
+INJECT:
+  db 4C 8B 07 4C 8D 0D 95 72 9C EE
+
+unregistersymbol(INJECT)
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: F1Manager22.exe+155D7539
+
+F1Manager22.exe+155D7511: E8 1A D3 E0 EB           - call F1Manager22.exe+13E4830
+F1Manager22.exe+155D7516: F6 C3 01                 - test bl,01
+F1Manager22.exe+155D7519: 74 19                    - je F1Manager22.exe+155D7534
+F1Manager22.exe+155D751B: 48 8B 8C 24 50 01 00 00  - mov rcx,[rsp+00000150]
+F1Manager22.exe+155D7523: 48 85 C9                 - test rcx,rcx
+F1Manager22.exe+155D7526: 74 0C                    - je F1Manager22.exe+155D7534
+F1Manager22.exe+155D7528: E8 03 D3 E0 EB           - call F1Manager22.exe+13E4830
+F1Manager22.exe+155D752D: 66 89 0D EE C7 ED 02     - mov [F1Manager22.exe+184B3D22],cx
+F1Manager22.exe+155D7534: 40 84 F6                 - test sil,sil
+F1Manager22.exe+155D7537: 75 3D                    - jne F1Manager22.exe+155D7576
+// ---------- INJECTING HERE ----------
+F1Manager22.exe+155D7539: 4C 8B 07                 - mov r8,[rdi]
+// ---------- DONE INJECTING  ----------
+F1Manager22.exe+155D753C: 4C 8D 0D 95 72 9C EE     - lea r9,[F1Manager22.exe+3F9E7D8]
+F1Manager22.exe+155D7543: 48 8B 4C 24 20           - mov rcx,[rsp+20]
+F1Manager22.exe+155D7548: 48 8D 15 89 72 9C EE     - lea rdx,[F1Manager22.exe+3F9E7D8]
+F1Manager22.exe+155D754F: E8 0C 5E 96 EB           - call F1Manager22.exe+F3D360
+F1Manager22.exe+155D7554: 48 89 C3                 - mov rbx,rax
+F1Manager22.exe+155D7557: 48 85 C0                 - test rax,rax
+F1Manager22.exe+155D755A: 75 1E                    - jne F1Manager22.exe+155D757A
+F1Manager22.exe+155D755C: 48 8B 0F                 - mov rcx,[rdi]
+F1Manager22.exe+155D755F: E8 1C 8E 96 EB           - call F1Manager22.exe+F40380
+F1Manager22.exe+155D7564: 48 8B 0F                 - mov rcx,[rdi]
+}
+</AssemblerScript>
+        </CheatEntry>
+      </CheatEntries>
+    </CheatEntry>
+  </CheatEntries>
+  <UserdefinedSymbols>
+    <SymbolEntry>
+      <Name>pSqlite3</Name>
+      <Address>7FF61A930000</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>fnOpenDatabase</Name>
+      <Address>7FF61A930010</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>fnCloseDatabase</Name>
+      <Address>7FF61A930020</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>fnBackupInit</Name>
+      <Address>7FF61A930030</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>fnBackupStep</Name>
+      <Address>7FF61A930040</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>fnBackupFinish</Name>
+      <Address>7FF61A930050</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>callExportDB</Name>
+      <Address>7FF61A930030</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>tmp_sqlite3</Name>
+      <Address>7FF61A930530</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>fname</Name>
+      <Address>7FF61A930540</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>callImportDB</Name>
+      <Address>7FF61A930510</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>database_name</Name>
+      <Address>7FF61A930560</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>export_done</Name>
+      <Address>7FF61A930010</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>import_done</Name>
+      <Address>7FF61A930020</Address>
+    </SymbolEntry>
+  </UserdefinedSymbols>
+</CheatTable>
